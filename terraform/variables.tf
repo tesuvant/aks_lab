@@ -1,4 +1,4 @@
-variable "demo" {
+variable "aks_name" {
   description = "AKS name"
   type        = string
 }
