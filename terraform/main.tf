@@ -54,8 +54,7 @@ resource "random_string" "dns_prefix" {
 }
 
 module "aks_cluster" {
-  source  = "Azure/containerservice/azurerm"
-  version = "0.2.7"
+  source = "git::https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster.git?ref=5c8c26ceac98e0f3c37251d04b976ed2748f5247"
 
   dns_prefix_private_cluster = random_string.dns_prefix.result
   name                       = var.aks_name
