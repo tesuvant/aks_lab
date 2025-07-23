@@ -1,0 +1,17 @@
+{
+  "extends": ["config:base"],
+  "enabledManagers": ["terraform"],
+  "packageRules": [
+    {
+      "managers": ["terraform"],
+      "paths": ["terraform"]
+    }
+  ],
+  "terraform": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["weekly"]
+  }
+}
