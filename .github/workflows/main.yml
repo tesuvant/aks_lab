@@ -1,0 +1,46 @@
+name: Terraform Main Deployment
+permissions: read-all # Allow the workflow to read the repository's content
+on:
+  push:
+    branches:
+      - main
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+
+    # Set default working directory for all 'run' commands in this job
+    defaults:
+      run:
+        working-directory: ./terraform/
+    env:
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_custom_domain: ${{ secrets.TF_VAR_CUSTOM_DOMAIN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.12.2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        if: github.ref == 'refs/heads/main'
+
+      - name: Azure Logout
+        run: |
+          az logout # Good practice to log out of Azure after the job completes
+        if: always() # Ensure this runs even if previous steps fail, to clean up credentials
