@@ -1,0 +1,51 @@
+name: Terraform Dev Check
+permissions: read-all # Allow the workflow to read the repository's content
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+jobs:
+  terraform-checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform/
+    env:
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_custom_domain: ${{ secrets.TF_VAR_CUSTOM_DOMAIN }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.12.2
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Run TFLint
+        uses: terraform-linters/setup-tflint@v1
+      - run: tflint
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Azure Logout
+        run: |
+          az logout # Good practice to log out of Azure after the job completes
+        if: always()
