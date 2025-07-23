@@ -7,11 +7,18 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.1.0.0/16"]
 }
 
+resource "azurerm_network_security_group" "aks_nsg" {
+  name                = "aks-subnet-nsg"
+  location            = var.location
+  resource_group_name = var.rg_name
+}
+
 resource "azurerm_subnet" "subnet" {
-  address_prefixes     = ["10.1.0.0/24"]
-  name                 = "default"
-  resource_group_name  = var.rg_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes          = ["10.1.0.0/24"]
+  name                      = "default"
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
+  resource_group_name       = var.rg_name
+  virtual_network_name      = azurerm_virtual_network.vnet.name
 }
 
 resource "azurerm_private_dns_zone" "zone" {
