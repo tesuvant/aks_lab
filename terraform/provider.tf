@@ -17,10 +17,4 @@ terraform {
 
 provider "azurerm" {
   features {}
-  default_tags {
-    enabled = true
-    tags = {
-      environment = "aks_argocd_demo"
-    }
-  }
 }
