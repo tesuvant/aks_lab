@@ -117,7 +117,7 @@ module "aks_cluster" {
     auto_scaling_enabled = false
     name                 = "default"
     node_count           = 1
-    vm_size              = "Standard_DS2_v2"
+    vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
   }
 
@@ -138,7 +138,12 @@ module "aks_cluster" {
 
   private_cluster_enabled = true
   private_dns_zone_id     = azurerm_private_dns_zone.zone.id
-  sku_tier                = "Standard"
+  sku_tier                = "Free"
+
+  tags = {
+    Environment = "Dev"
+    Service     = "aks"
+  }
 
   depends_on = [azurerm_role_assignment.private_dns_zone_contributor]
 }
