@@ -3,7 +3,7 @@ permissions: read-all # Allow the workflow to read the repository's content
 on:
   pull_request:
     branches:
-      - dev
+      - main
 jobs:
   terraform-checks:
     runs-on: ubuntu-latest
