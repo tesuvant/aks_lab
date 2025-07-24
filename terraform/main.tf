@@ -4,7 +4,7 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.location
   name                = "private-vnet"
   resource_group_name = var.rg_name
-  address_space       = ["10.1.0.0/16"]
+  address_space       = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "subnet" {
