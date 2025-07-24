@@ -1,12 +1,11 @@
 name: Terraform Dev Check
-permissions: read-all # Allow the workflow to read the repository's content
+permissions:
+  contents: read
+  pull-requests: write
 on:
-  push:
-    branches:
-      - dev
   pull_request:
     branches:
-      - dev
+      - main
 jobs:
   terraform-checks:
     runs-on: ubuntu-latest
@@ -17,7 +16,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v1
@@ -49,3 +48,70 @@ jobs:
         run: |
           az logout # Good practice to log out of Azure after the job completes
         if: always()
+
+  infracost-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform/
+    steps:
+      # Checkout "main" branch of the pull request
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Generate Infracost JSON file as the baseline
+      - name: Generate Infracost cost estimate baseline
+        run: |
+          infracost breakdown --path=. \
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
+
+      # Checkout the current PR branch
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      # Generate an Infracost diff JSON
+      - name: Generate Infracost diff
+        run: |
+          infracost diff --path=. \
+                          --format=json \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+
+      # Posts a comment to the PR using the 'update' behavior.
+      # This creates a single comment and updates it
+      - name: Post Infracost comment
+        run: |
+            infracost comment github --path=/tmp/infracost.json \
+                                     --repo=$GITHUB_REPOSITORY \
+                                     --github-token=${{ github.token }} \
+                                     --pull-request=${{ github.event.pull_request.number }} \
+                                     --behavior=update
+
+  # Update PR status in Infracost Cloud
+  infracost-pull-request-status-update:
+    name: Infracost PR Status Update
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Infracost PR Status Update
+      run: |
+        PR_STATUS="MERGED"
+        if [[ ${{ github.event.pull_request.merged }} = false ]]; then PR_STATUS="CLOSED"; fi
+
+        echo "Updating status of ${{ github.event.pull_request.html_url }} to $PR_STATUS"
+        curl -i \
+          --request POST \
+          --header "Content-Type: application/json" \
+          --header "X-API-Key: $INFRACOST_API_KEY" \
+          --data "{ \"query\": \"mutation {updatePullRequestStatus( url: \\\"${{ github.event.pull_request.html_url }}\\\", status: $PR_STATUS )}\" }" \
+          "https://dashboard.api.infracost.io/graphql";
+      env:
+        INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
