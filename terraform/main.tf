@@ -34,9 +34,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vnet_link" {
 }
 
 resource "azurerm_user_assigned_identity" "identity" {
-  location            = azurerm_resource_group.this.location
+  location            = var.location
   name                = "aks-identity"
-  resource_group_name = azurerm_resource_group.this.name
+  resource_group_name = var.rg_name
 }
 
 resource "azurerm_role_assignment" "private_dns_zone_contributor" {
