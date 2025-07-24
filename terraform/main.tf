@@ -4,7 +4,8 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.location
   name                = "private-vnet"
   resource_group_name = var.rg_name
-  address_space       = ["10.1.0.0/16"]
+  address_space       = ["10.0.0.0/16"]
+  tags                = local.common_tags
 }
 
 resource "azurerm_subnet" "subnet" {
@@ -66,6 +67,8 @@ resource "azurerm_network_security_group" "aks_nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  tags = local.common_tags
 }
 
 resource "azurerm_subnet_network_security_group_association" "aks_nsg_ass" {
@@ -76,6 +79,7 @@ resource "azurerm_subnet_network_security_group_association" "aks_nsg_ass" {
 resource "azurerm_private_dns_zone" "zone" {
   name                = "privatelink.${var.location}.azmk8s.io"
   resource_group_name = var.rg_name
+  tags                = local.common_tags
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "vnet_link" {
@@ -83,12 +87,14 @@ resource "azurerm_private_dns_zone_virtual_network_link" "vnet_link" {
   private_dns_zone_name = azurerm_private_dns_zone.zone.name
   resource_group_name   = var.rg_name
   virtual_network_id    = azurerm_virtual_network.vnet.id
+  tags                  = local.common_tags
 }
 
 resource "azurerm_user_assigned_identity" "identity" {
   location            = var.location
   name                = "aks-identity"
   resource_group_name = var.rg_name
+  tags                = local.common_tags
 }
 
 resource "azurerm_role_assignment" "private_dns_zone_contributor" {
@@ -140,10 +146,7 @@ module "aks_cluster" {
   private_dns_zone_id     = azurerm_private_dns_zone.zone.id
   sku_tier                = "Free"
 
-  tags = {
-    Environment = "Dev"
-    Service     = "aks"
-  }
+  tags = local.common_tags
 
   depends_on = [azurerm_role_assignment.private_dns_zone_contributor]
 }
