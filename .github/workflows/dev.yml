@@ -17,7 +17,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v1
@@ -46,28 +46,44 @@ jobs:
         run: terraform plan
 
       - name: Setup Infracost
-        uses: infracost/actions/setup@v2
-
-      - name: Authenticate Infracost
-        run: infracost auth login
-        env:
-          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-
-      - name: Run Infracost breakdown
-        run: |
-          infracost breakdown \
-            --path=tfplan.binary \
-            --terraform-plan-flags="-out=tfplan.binary" \
-            --format=json \
-            --out-file=infracost.json
-
-      - name: Post cost estimate as PR comment
-        if: github.event_name == 'pull_request'
-        uses: infracost/actions/comment@v2
+        uses: infracost/actions/setup@v3
         with:
-          path: infracost.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Checkout "main" branch of the pull request
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+
+      # Generate Infracost JSON file as the baseline
+      - name: Generate Infracost cost estimate baseline
+        run: |
+          infracost breakdown --path=. \
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
+
+      # Checkout the current PR branch
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      # Generate an Infracost diff JSON
+      - name: Generate Infracost diff
+        run: |
+          infracost diff --path=. \
+                          --format=json \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+
+      # Posts a comment to the PR using the 'update' behavior.
+      # This creates a single comment and updates it
+      - name: Post Infracost comment
+        run: |
+            infracost comment github --path=/tmp/infracost.json \
+                                     --repo=$GITHUB_REPOSITORY \
+                                     --github-token=${{ github.token }} \
+                                     --pull-request=${{ github.event.pull_request.number }} \
+                                     --behavior=update
 
       - name: Azure Logout
         run: |
