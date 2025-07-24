@@ -1,5 +1,7 @@
 name: Terraform Dev Check
-permissions: read-all # Allow the workflow to read the repository's content
+permissions:
+  contents: read
+  pull-requests: write
 on:
   pull_request:
     branches:
