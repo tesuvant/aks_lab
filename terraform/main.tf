@@ -33,37 +33,13 @@ resource "azurerm_network_security_group" "aks_nsg" {
   }
 
   security_rule {
-    name                       = "Allow-Outbound-To-AzureCloud"
+    name                       = "Allow-Outbound"
     priority                   = 110
     direction                  = "Outbound"
     access                     = "Allow"
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "AzureCloud"
-  }
-
-  security_rule {
-    name                       = "Allow-DNS"
-    priority                   = 120
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Udp"
-    source_port_range          = "*"
-    destination_port_range     = "53"
-    source_address_prefix      = "*"
-    destination_address_prefix = "AzurePlatformDNS"
-  }
-
-  security_rule {
-    name                       = "Allow-NTP"
-    priority                   = 130
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Udp"
-    source_port_range          = "*"
-    destination_port_range     = "123"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
