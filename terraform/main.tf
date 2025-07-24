@@ -13,7 +13,6 @@ resource "azurerm_subnet" "subnet" {
   name                 = "default"
   resource_group_name  = var.rg_name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  tags                 = local.common_tags
 }
 
 resource "azurerm_network_security_group" "aks_nsg" {
