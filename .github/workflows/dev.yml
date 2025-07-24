@@ -88,3 +88,24 @@ jobs:
         run: |
           az logout # Good practice to log out of Azure after the job completes
         if: always()
+
+  # Update PR status in Infracost Cloud
+  infracost-pull-request-status-update:
+    name: Infracost PR Status Update
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Infracost PR Status Update
+      run: |
+        PR_STATUS="MERGED"
+        if [[ ${{ github.event.pull_request.merged }} = false ]]; then PR_STATUS="CLOSED"; fi
+
+        echo "Updating status of ${{ github.event.pull_request.html_url }} to $PR_STATUS"
+        curl -i \
+          --request POST \
+          --header "Content-Type: application/json" \
+          --header "X-API-Key: $INFRACOST_API_KEY" \
+          --data "{ \"query\": \"mutation {updatePullRequestStatus( url: \\\"${{ github.event.pull_request.html_url }}\\\", status: $PR_STATUS )}\" }" \
+          "https://dashboard.api.infracost.io/graphql";
+      env:
+        INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
