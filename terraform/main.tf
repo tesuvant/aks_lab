@@ -8,7 +8,7 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  address_prefixes     = ["10.1.0.0/24"]
+  address_prefixes     = [var.aks_subnet_cidr]
   name                 = "default"
   resource_group_name  = var.rg_name
   virtual_network_name = azurerm_virtual_network.vnet.name
@@ -18,6 +18,54 @@ resource "azurerm_network_security_group" "aks_nsg" {
   name                = "aks-subnet-nsg"
   location            = var.location
   resource_group_name = var.rg_name
+
+  security_rule {
+    name                       = "Allow-Node-To-Node"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = var.aks_subnet_cidr
+    destination_address_prefix = var.aks_subnet_cidr
+  }
+
+  security_rule {
+    name                       = "Allow-Outbound-To-AzureCloud"
+    priority                   = 110
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "AzureCloud"
+  }
+
+  security_rule {
+    name                       = "Allow-DNS"
+    priority                   = 120
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    destination_port_range     = "53"
+    source_address_prefix      = "*"
+    destination_address_prefix = "AzurePlatformDNS"
+  }
+
+  security_rule {
+    name                       = "Allow-NTP"
+    priority                   = 130
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    destination_port_range     = "123"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "aks_nsg_ass" {

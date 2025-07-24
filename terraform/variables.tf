@@ -3,6 +3,11 @@ variable "aks_name" {
   type        = string
 }
 
+variable "aks_subnet_cidr" {
+  description = "AKS subnet CIDR"
+  type        = string
+}
+
 variable "location" {
   description = "Azure region location"
   type        = string
