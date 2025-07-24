@@ -109,7 +109,8 @@ module "aks_cluster" {
   }
 
   managed_identities = {
-    system_assigned = true
+    system_assigned            = false
+    user_assigned_resource_ids = [azurerm_user_assigned_identity.identity.id]
   }
 
   network_profile = {
