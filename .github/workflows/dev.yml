@@ -45,6 +45,30 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+
+      - name: Authenticate Infracost
+        run: infracost auth login
+        env:
+          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Run Infracost breakdown
+        run: |
+          infracost breakdown \
+            --path=tfplan.binary \
+            --terraform-plan-flags="-out=tfplan.binary" \
+            --format=json \
+            --out-file=infracost.json
+
+      - name: Post cost estimate as PR comment
+        if: github.event_name == 'pull_request'
+        uses: infracost/actions/comment@v2
+        with:
+          path: infracost.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Azure Logout
         run: |
           az logout # Good practice to log out of Azure after the job completes
