@@ -140,5 +140,10 @@ module "aks_cluster" {
   private_dns_zone_id     = azurerm_private_dns_zone.zone.id
   sku_tier                = "Free"
 
+  tags = {
+    Environment = "Dev"
+    Service     = "aks"
+  }
+
   depends_on = [azurerm_role_assignment.private_dns_zone_contributor]
 }
