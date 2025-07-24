@@ -1,1 +1,0 @@
-{"Path":".","Version":"2.0","Modules":[{"Key":"aks_cluster","Source":"git::https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster.git?ref=5c8c26ceac98e0f3c37251d04b976ed2748f5247","Dir":".infracost/terraform_modules/8641c2d1d06330500dd692fc320268ab","DownloadURL":""}]}
