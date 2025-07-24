@@ -44,16 +44,27 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      - name: Setup Infracost
-        uses: infracost/actions/setup@v3
-        with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
+      - name: Azure Logout
+        run: |
+          az logout # Good practice to log out of Azure after the job completes
+        if: always()
 
+  infracost-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform/
+    steps:
       # Checkout "main" branch of the pull request
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       # Generate Infracost JSON file as the baseline
       - name: Generate Infracost cost estimate baseline
@@ -83,11 +94,6 @@ jobs:
                                      --github-token=${{ github.token }} \
                                      --pull-request=${{ github.event.pull_request.number }} \
                                      --behavior=update
-
-      - name: Azure Logout
-        run: |
-          az logout # Good practice to log out of Azure after the job completes
-        if: always()
 
   # Update PR status in Infracost Cloud
   infracost-pull-request-status-update:
