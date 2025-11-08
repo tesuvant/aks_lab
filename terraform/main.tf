@@ -116,7 +116,6 @@ module "aks_cluster" {
     }
   }
   node_pools = {
-    auto_scaling_enabled = false
     name                 = "spotpool"
     node_count           = 1
     vm_size              = "Standard_B1s"
