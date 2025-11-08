@@ -1,21 +1,28 @@
 {
-  "extends": ["config:base"],
+  "extends": ["config:recommended"],
   "enabledManagers": ["terraform", "github-actions"],
-  "packageRules": [
-    {
-      "managers": ["terraform"],
-      "paths": ["terraform"]
-    },
-    {
-      "managers": ["github-actions"],
-      "paths": [".github/workflows"]
-    }
-  ],
-  "terraform": {
-    "enabled": true
-  },
+
+  "ignoreUnstable": true,
+
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 2,
+
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["weekly"]
-  }
+  },
+
+  "packageRules": [
+    {
+      "matchManagers": ["terraform"],
+      "matchPaths": ["terraform/**"],
+      "commitMessageTopic": "Terraform {{depName}}",
+      "pinDigests": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchPaths": [".github/workflows/**"],
+      "commitMessageTopic": "GitHub Actions {{depName}}"
+    }
+  ]
 }
