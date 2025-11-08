@@ -118,7 +118,6 @@ module "aks_cluster" {
   node_pools = {
     auto_scaling_enabled = false
     name                 = "spotpool"
-    max_pods             = 50
     node_count           = 1
     vm_size              = "Standard_B1s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
