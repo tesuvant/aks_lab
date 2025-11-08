@@ -95,10 +95,20 @@ module "aks_cluster" {
   location                   = var.location
   resource_group_name        = var.rg_name
 
+  maintenance_window_auto_upgrade = {
+    frequency   = "Weekly"
+    interval    = "1"
+    day_of_week = "Sunday"
+    duration    = 4
+    utc_offset  = "+00:00"
+    start_time  = "00:00"
+    start_date  = "2025-11-08T00:00:00Z"
+  }
+
   default_node_pool = {
     auto_scaling_enabled = false
     name                 = "default"
-    node_count           = 1
+    node_count           = 2
     vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
   }
