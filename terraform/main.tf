@@ -109,7 +109,7 @@ module "aks_cluster" {
     auto_scaling_enabled = false
     name                 = "default"
     node_count           = 1
-    vm_size              = "Standard_B1s"
+    vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
     node_labels = {
       "pool-type" = "default"
