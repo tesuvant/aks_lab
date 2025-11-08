@@ -116,7 +116,7 @@ module "aks_cluster" {
     priority             = "Spot"
     eviction_policy      = "Delete"
     spot_max_price       = "-1"
-    node_labels          = {
+    node_labels = {
       "pool-type" = "spot"
     }
   }
