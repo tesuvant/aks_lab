@@ -111,6 +111,14 @@ module "aks_cluster" {
     node_count           = 2
     vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
+    min_count            = 1
+    max_count            = 2
+    priority             = "Spot"
+    eviction_policy      = "Delete"
+    spot_max_price       = "-1"
+    node_labels          = {
+      "pool-type" = "spot"
+    }
   }
 
   azure_active_directory_role_based_access_control = {
