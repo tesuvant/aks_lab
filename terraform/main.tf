@@ -88,19 +88,37 @@ resource "random_string" "dns_prefix" {
 }
 
 module "aks_cluster" {
-  source = "git::https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster.git?ref=5c8c26ceac98e0f3c37251d04b976ed2748f5247"
+  source = "git::https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster.git?ref=d63075d111501caf1d2be19639ee0723043a52b0"
 
   dns_prefix_private_cluster = random_string.dns_prefix.result
   name                       = var.aks_name
   location                   = var.location
   resource_group_name        = var.rg_name
 
+  maintenance_window_auto_upgrade = {
+    frequency   = "Weekly"
+    interval    = "1"
+    day_of_week = "Sunday"
+    duration    = 4
+    utc_offset  = "+00:00"
+    start_time  = "00:00"
+    start_date  = "2025-11-08T00:00:00Z"
+  }
+
   default_node_pool = {
     auto_scaling_enabled = false
     name                 = "default"
-    node_count           = 1
+    node_count           = 2
     vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
+    min_count            = 1
+    max_count            = 2
+    priority             = "Spot"
+    eviction_policy      = "Delete"
+    spot_max_price       = "-1"
+    node_labels = {
+      "pool-type" = "spot"
+    }
   }
 
   azure_active_directory_role_based_access_control = {
