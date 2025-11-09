@@ -109,24 +109,11 @@ module "aks_cluster" {
     auto_scaling_enabled = false
     name                 = "default"
     node_count           = 1
+    max_pods             = 50
     vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.subnet.id
     node_labels = {
       "pool-type" = "default"
-    }
-  }
-  node_pools = {
-    spotpool = {
-      name            = "spotpool"
-      node_count      = 1
-      vm_size         = "Standard_B2s"
-      vnet_subnet_id  = azurerm_subnet.subnet.id
-      priority        = "Spot"
-      eviction_policy = "Delete"
-      spot_max_price  = "-1"
-      node_labels = {
-        "pool-type" = "spot"
-      }
     }
   }
 
