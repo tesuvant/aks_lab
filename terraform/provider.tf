@@ -18,15 +18,3 @@ terraform {
 provider "azurerm" {
   features {}
 }
-
-
-terraform {
-  required_providers {
-    null = {
-      source  = "hashicorp/null"
-      version = "3.2.4"  # An older version, if a newer version exists
-    }
-  }
-}
-
-provider "null" {}
