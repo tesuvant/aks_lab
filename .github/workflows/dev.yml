@@ -32,7 +32,7 @@ jobs:
         run: terraform fmt -check
 
       - name: Run TFLint
-        uses: terraform-linters/setup-tflint@v1
+        uses: terraform-linters/setup-tflint@v6
       - run: tflint
 
       - name: Run Checkov
