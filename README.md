@@ -51,3 +51,13 @@ This repository contains Infrastructure as Code (IaC) for Azure that bootstraps 
   - Uses a Personal Access Token (`secrets.CLEAN_WF`) with appropriate permissions to delete logs.
   - Runs with `continue-on-error: true` to avoid workflow failure if cleanup errors occur.
 
+## Dependency Management with Renovate
+
+This repository uses [Renovate](https://renovatebot.com/) to automate dependency updates.
+
+- Renovate is configured using the `renovate.json` file with the recommended preset.
+- It automatically scans for outdated dependencies and creates Pull Requests to update them.
+- This helps keep dependencies up-to-date, secure, and reduces manual maintenance overhead.
+- You can find further details and customize Renovate via its configuration documentation: https://docs.renovatebot.com/
+
+By integrating Renovate, this repo maintains a clean and secure dependency graph over time.
