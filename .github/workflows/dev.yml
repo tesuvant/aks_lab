@@ -39,7 +39,11 @@ jobs:
         uses: bridgecrewio/checkov-action@master
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init \
+            -backend-config="resource_group_name=${{ secrets.BACKEND_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ secrets.BACKEND_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ secrets.BACKEND_CONTAINER }}" \
+            -backend-config="key=${{ secrets.BACKEND_KEY }}" 
 
       - name: Terraform Plan
         run: terraform plan
