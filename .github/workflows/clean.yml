@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: yanovation/delete-old-actions@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CLEAN_WF }}
           days-ago: 0
           dry-run: false
           keep-latest: 0
