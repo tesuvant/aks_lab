@@ -1,6 +1,0 @@
-{
-  "extends": ["config:recommended"],
-  "enabledManagers": ["npm", "docker"],
-  "prHourlyLimit": 2,
-  "prConcurrentLimit": 5
-}
