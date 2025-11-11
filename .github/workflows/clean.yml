@@ -10,6 +10,7 @@ on:
 jobs:
   delete-old-actions:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - uses: yanovation/delete-old-actions@v1
