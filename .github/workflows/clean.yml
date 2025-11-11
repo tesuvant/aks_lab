@@ -1,3 +1,7 @@
+name: Log Cleanup
+permissions:
+  contents: read
+  actions: read
 on:
   schedule:
     - cron: '*/5 * * * *'
