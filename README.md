@@ -76,4 +76,13 @@ kubectl get po
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo list
+argocd repo add https://prometheus-community.github.io/helm-charts --type helm --name prometheus-community
+argocd app create kube-prometheus-stack \
+  --repo https://prometheus-community.github.io/helm-charts \
+  --helm-chart kube-prometheus-stack \
+  --revision 79.5.0 \
+  --dest-server https://kubernetes.default.svc
+
 ```
