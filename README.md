@@ -61,3 +61,15 @@ This repository uses [Renovate](https://renovatebot.com/) to automate dependency
 - You can find further details and customize Renovate via its configuration documentation: https://docs.renovatebot.com/
 
 By integrating Renovate, this repo maintains a clean and secure dependency graph over time.
+
+
+
+# Notes
+```
+AKS_ID=$(az aks show --resource-group aks --name demo --query id -o tsv)
+az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service Cluster Admin Role" --scope $AKS_ID
+az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service RBAC Cluster Admin" --scope $AKS_ID
+az aks get-credentials -g aks -n demo --overwrite-existing
+kubectl get po
+<devicelogin>
+```
