@@ -79,10 +79,13 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo list
 argocd repo add https://prometheus-community.github.io/helm-charts --type helm --name prometheus-community
+kubectl create ns monitoring
 argocd app create kube-prometheus-stack \
   --repo https://prometheus-community.github.io/helm-charts \
   --helm-chart kube-prometheus-stack \
   --revision 79.5.0 \
-  --dest-server https://kubernetes.default.svc
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace monitoring
+argocd app sync argocd/kube-prometheus-stack
 
 ```
