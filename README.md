@@ -72,4 +72,8 @@ az role assignment create --assignee <user-object-id> --role "Azure Kubernetes S
 az aks get-credentials -g aks -n demo --overwrite-existing
 kubectl get po
 <devicelogin>
+
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
 ```
