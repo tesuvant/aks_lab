@@ -128,10 +128,9 @@ module "aks_cluster" {
   }
 
   network_profile = {
-    dns_service_ip    = "10.10.200.10"
-    service_cidr      = "10.10.200.0/24"
-    network_plugin    = "azure"
-    load_balancer_sku = "basic"
+    dns_service_ip = "10.10.200.10"
+    service_cidr   = "10.10.200.0/24"
+    network_plugin = "azure"
   }
 
   private_cluster_enabled = true
