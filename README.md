@@ -69,6 +69,7 @@ By integrating Renovate, this repo maintains a clean and secure dependency graph
 AKS_ID=$(az aks show --resource-group aks --name demo --query id -o tsv)
 az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service Cluster Admin Role" --scope $AKS_ID
 az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service RBAC Cluster Admin" --scope $AKS_ID
+az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service RBAC Admin" --scope $AKS_ID
 az aks get-credentials -g aks -n demo --overwrite-existing
 kubectl get po
 <devicelogin>
