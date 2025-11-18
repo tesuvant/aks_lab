@@ -69,13 +69,14 @@ By integrating Renovate, this repo maintains a clean and secure dependency graph
 AKS_ID=$(az aks show --resource-group aks --name demo --query id -o tsv)
 az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service Cluster Admin Role" --scope $AKS_ID
 az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service RBAC Cluster Admin" --scope $AKS_ID
-az role assignment create --assignee <user-object-id> --role "Azure Kubernetes Service RBAC Admin" --scope $AKS_ID
 az aks get-credentials -g aks -n demo --overwrite-existing
 kubectl get po
 <devicelogin>
 
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+k apply -f backup.yaml -n argocd
+echo -n $(k get secret argocd-initial-admin-secret -ojson  -n argocd | jq -r .data.password) | base64 -d
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo list
