@@ -8,6 +8,10 @@ data "azurerm_virtual_machine" "vm" {
   resource_group_name = var.rg_name
 }
 
+output "virtual_machine_id" {
+  value = data.azurerm_virtual_machine.vm.id
+}
+
 resource "azurerm_service_plan" "plan" {
   name                = "finops-function-app-plan"
   location            = var.location
@@ -86,8 +90,7 @@ resource "azurerm_role_assignment" "aks_access" {
 }
 
 resource "azurerm_role_assignment" "vm_access" {
-  scope                = data.azurerm_linux_virtual_machine.vm.id
+  scope                = output.virtual_machine_id.value
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
-
 }
