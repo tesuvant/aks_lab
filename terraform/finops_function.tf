@@ -20,11 +20,11 @@ resource "azurerm_service_plan" "plan" {
 }
 
 resource "azurerm_windows_function_app" "function_app" {
-  name                 = "shutdown-function"
-  location             = var.location
-  resource_group_name  = var.rg_name
-  service_plan_id      = azurerm_service_plan.plan.id
-  storage_account_name = var.storage_account_name
+  name                          = "shutdown-function"
+  location                      = var.location
+  resource_group_name           = var.rg_name
+  service_plan_id               = azurerm_service_plan.plan.id
+  storage_account_name          = var.storage_account_name
   public_network_access_enabled = false
   site_config {}
 
