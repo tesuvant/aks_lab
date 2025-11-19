@@ -61,7 +61,7 @@ resource "azurerm_function_app_slot" "slot" {
 
   # Checkov fixes below
   # checkov:skip=CKV_AZURE_56
-  https_only      = true
+  https_only = true
   site_config {
     http2_enabled = true
   }
