@@ -15,6 +15,8 @@ resource "azurerm_service_plan" "plan" {
   kind                = "FunctionApp"
   sku_name            = "Y1"
   os_type             = "Windows"
+  # checkov:skip=CKV_AZURE_212: using consumption plan
+  # checkov:skip=CKV_AZURE_225: zone redundant not important
 }
 
 resource "azurerm_windows_function_app" "function_app" {
@@ -23,6 +25,7 @@ resource "azurerm_windows_function_app" "function_app" {
   resource_group_name  = var.rg_name
   service_plan_id      = azurerm_service_plan.plan.id
   storage_account_name = var.storage_account_name
+  public_network_access_enabled = false
   site_config {}
 
   # version       = "~4"
