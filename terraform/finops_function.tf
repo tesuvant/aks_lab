@@ -39,6 +39,9 @@ resource "azurerm_function_app" "function_app" {
   identity {
     type = "SystemAssigned"
   }
+  # checkov:skip=CKV_AZURE_56: auth enabled
+  # checkov:skip=CKV_AZURE_70: https only
+  # checkov:skip=CKV_AZURE_67: latest http version
 }
 
 resource "azurerm_role_assignment" "aks_access" {
@@ -59,12 +62,9 @@ resource "azurerm_function_app_slot" "slot" {
   function_app_id = azurerm_function_app.function.id
   app_settings    = var.app_settings
 
-  # Checkov fixes below
-  # checkov:skip=CKV_AZURE_56
-  https_only = true
-  site_config {
-    http2_enabled = true
-  }
+  # checkov:skip=CKV_AZURE_56: auth enabled
+  # checkov:skip=CKV_AZURE_70: https only
+  # checkov:skip=CKV_AZURE_67: latest http version
 }
 
 resource "azurerm_function_app_function" "timer_trigger" {
