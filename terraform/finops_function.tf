@@ -52,6 +52,7 @@ resource "azurerm_windows_function_app_slot" "slot" {
   name                          = "production"
   function_app_id               = azurerm_windows_function_app.function_app.id
   public_network_access_enabled = false
+  storage_account_name          = var.storage_account_name
   site_config {}
   # checkov:skip=CKV_AZURE_56: auth enabled
   # checkov:skip=CKV_AZURE_70: https only
@@ -80,11 +81,13 @@ CONFIG
 resource "azurerm_role_assignment" "aks_access" {
   scope                = module.aks_cluster.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_function_app.function_app.identity.principal_id
+  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
+
 }
 
 resource "azurerm_role_assignment" "vm_access" {
   scope                = data.azurerm_linux_virtual_machine.vm.id
   role_definition_name = "Virtual Machine Contributor"
-  principal_id         = azurerm_windows_function_app.function_app.identity.principal_id
+  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
+
 }
