@@ -12,7 +12,6 @@ resource "azurerm_service_plan" "plan" {
   name                = "finops-function-app-plan"
   location            = var.location
   resource_group_name = var.rg_name
-  kind                = "FunctionApp"
   sku_name            = "Y1"
   os_type             = "Windows"
   # checkov:skip=CKV_AZURE_212: using consumption plan
@@ -51,7 +50,7 @@ resource "azurerm_windows_function_app" "function_app" {
 
 resource "azurerm_windows_function_app_slot" "slot" {
   name                          = "production"
-  function_app_id               = azurerm_windows_function_app.function.id
+  function_app_id               = azurerm_windows_function_app.function_app.id
   public_network_access_enabled = false
   site_config {}
   # checkov:skip=CKV_AZURE_56: auth enabled
@@ -61,7 +60,7 @@ resource "azurerm_windows_function_app_slot" "slot" {
 
 resource "azurerm_function_app_function" "timer_trigger" {
   name            = "TimerTriggerFunction"
-  function_app_id = azurerm_function_app.function.id
+  function_app_id = azurerm_windows_function_app.function_app.id
 
   config_json = <<CONFIG
 {
@@ -79,13 +78,13 @@ CONFIG
 
 
 resource "azurerm_role_assignment" "aks_access" {
-  scope                = azurerm_kubernetes_cluster.aks.id
+  scope                = module.aks_cluster.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_function_app.function_app.identity.principal_id
+  principal_id         = azurerm_windows_function_app.function_app.identity.principal_id
 }
 
 resource "azurerm_role_assignment" "vm_access" {
   scope                = data.azurerm_linux_virtual_machine.vm.id
   role_definition_name = "Virtual Machine Contributor"
-  principal_id         = azurerm_function_app.function_app.identity.principal_id
+  principal_id         = azurerm_windows_function_app.function_app.identity.principal_id
 }
