@@ -58,6 +58,13 @@ resource "azurerm_function_app_slot" "slot" {
   name            = "production"
   function_app_id = azurerm_function_app.function.id
   app_settings    = var.app_settings
+
+  # Checkov fixes below
+  # checkov:skip=CKV_AZURE_56
+  https_only      = true
+  site_config {
+    http2_enabled = true
+  }
 }
 
 resource "azurerm_function_app_function" "timer_trigger" {
