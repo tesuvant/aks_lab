@@ -34,7 +34,7 @@ resource "azurerm_windows_function_app" "function_app" {
     AzureWebJobsStorage      = data.azurerm_storage_account.sa.primary_connection_string
     FUNCTIONS_WORKER_RUNTIME = "powershell"
     RESOURCE_GROUP           = var.rg_name
-    VM_NAME                  = "foobar"
+    VM_NAME                  = data.azurerm_virtual_machine.vm.name
     WEBSITE_RUN_FROM_PACKAGE = "1"
   }
 
