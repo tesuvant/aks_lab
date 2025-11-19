@@ -50,8 +50,9 @@ resource "azurerm_windows_function_app" "function_app" {
 }
 
 resource "azurerm_windows_function_app_slot" "slot" {
-  name            = "production"
-  function_app_id = azurerm_windows_function_app.function.id
+  name                          = "production"
+  function_app_id               = azurerm_windows_function_app.function.id
+  public_network_access_enabled = false
   site_config {}
   # checkov:skip=CKV_AZURE_56: auth enabled
   # checkov:skip=CKV_AZURE_70: https only
