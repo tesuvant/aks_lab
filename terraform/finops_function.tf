@@ -39,13 +39,13 @@ resource "azurerm_windows_function_app" "function_app" {
     VM_NAME                  = data.azurerm_virtual_machine.vm.name
     WEBSITE_RUN_FROM_PACKAGE = "1"
 
-    vnetContentShareEnabled = true
-    vnetRouteAllEnabled = true
+    vnetContentShareEnabled                  = true
+    vnetRouteAllEnabled                      = true
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = data.azurerm_storage_account.sa.primary_connection_string
-    WEBSITE_CONTENTOVERVNET = 1 // Deprecated
-    WEBSITE_CONTENTSHARE = shutdown-function
-    WEBSITE_DNS_SERVER = 168.63.129.16
-    WEBSITE_VNET_ROUTE_ALL = 1 // Deprecated
+    WEBSITE_CONTENTOVERVNET                  = 1 // Deprecated
+    WEBSITE_CONTENTSHARE                     = shutdown-function
+    WEBSITE_DNS_SERVER                       = "168.63.129.16"
+    WEBSITE_VNET_ROUTE_ALL                   = 1 // Deprecated
   }
 
   identity {
