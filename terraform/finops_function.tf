@@ -83,7 +83,7 @@ CONFIG
 
 
 resource "azurerm_role_assignment" "aks_access" {
-  scope                = module.aks_cluster.id
+  scope                = module.aks_cluster.output.resource_id.value
   role_definition_name = "Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 
