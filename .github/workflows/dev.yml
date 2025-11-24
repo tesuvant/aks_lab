@@ -18,7 +18,7 @@ jobs:
       TF_VAR_storage_account_name: ${{ secrets.BACKEND_STORAGE_ACCOUNT_NAME }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v2
@@ -59,7 +59,7 @@ jobs:
     steps:
       # Checkout "main" branch of the pull request
       - name: Checkout base branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
@@ -77,7 +77,7 @@ jobs:
 
       # Checkout the current PR branch
       - name: Checkout PR branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Generate an Infracost diff JSON
       - name: Generate Infracost diff
