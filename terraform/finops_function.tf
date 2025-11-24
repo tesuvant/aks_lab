@@ -91,7 +91,7 @@ resource "azurerm_role_assignment" "vm_access" {
 }
 
 resource "azurerm_role_assignment" "function_sa_contributor" {
-  scope                = azurerm_storage_account.sa.id
+  scope                = data.azurerm_storage_account.sa.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 }
