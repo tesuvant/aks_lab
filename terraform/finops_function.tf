@@ -57,7 +57,7 @@ resource "azurerm_windows_function_app" "function_app" {
 }
 
 resource "azurerm_windows_function_app_slot" "slot" {
-  name                          = "production"
+  name                          = "staging"
   function_app_id               = azurerm_windows_function_app.function_app.id
   public_network_access_enabled = false
   storage_account_name          = var.storage_account_name
