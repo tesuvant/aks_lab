@@ -90,8 +90,14 @@ resource "azurerm_role_assignment" "vm_access" {
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 }
 
-resource "azurerm_role_assignment" "function_sa_contributor" {
+resource "azurerm_role_assignment" "function_sa_storage_account_contributor" {
   scope                = data.azurerm_storage_account.sa.id
-  role_definition_name = "Storage Blob Data Contributor"
+  role_definition_name = "Storage Account Contributor"
+  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "function_sa_file_smb_contributor" {
+  scope                = data.azurerm_storage_account.sa.id
+  role_definition_name = "Storage File Data SMB Share Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 }
