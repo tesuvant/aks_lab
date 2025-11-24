@@ -11,13 +11,32 @@ try {
     $aksName = $env:AKS_NAME
     $vmName = $env:VM_NAME
 
-    # Stop AKS cluster
-    Stop-AzAksCluster -ResourceGroupName $resourceGroup -Name $aksName -Force
-    Write-Host "AKS cluster '$aksName' stopped."
+    # AKS exists check
+    $aks = $null
+    try {
+        $aks = Get-AzAksCluster -ResourceGroupName $resourceGroup -Name $aksName -ErrorAction Stop
+    } catch {
+        Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
+    }
 
-    # Stop VM
-    Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force
-    Write-Host "Virtual machine '$vmName' stopped."
+    # AKS stop
+    if ($aks) {
+        Stop-AzAksCluster -ResourceGroupName $resourceGroup -Name $aksName -Force
+        Write-Host "AKS cluster '$aksName' stopped."
+    }
+
+    # VM exsists check
+    $vm = $null
+    try {
+        $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction Stop
+    } catch {
+        Write-Host "Virtual machine '$vmName' not found in resource group '$resourceGroup'. Skipping stop."
+    }
+    # VM stop
+    if ($vm) {
+        Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force
+        Write-Host "Virtual machine '$vmName' stopped."
+    }
 
 } catch {
     Write-Error "Error: $_"

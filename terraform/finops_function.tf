@@ -89,4 +89,3 @@ resource "azurerm_role_assignment" "vm_access" {
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 }
-
