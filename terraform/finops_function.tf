@@ -144,3 +144,4 @@ resource "null_resource" "deploy_function" {
   }
   depends_on = [azurerm_windows_function_app.function_app]
 }
+
