@@ -109,3 +109,22 @@ resource "azurerm_role_assignment" "function_sa_file_smb_contributor" {
   role_definition_name = "Storage File Data SMB Share Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 }
+
+
+resource "null_resource" "deploy_function" {
+  triggers = {
+    script_hash = filesha256("${path.module}/func/shutdown/run.ps1")
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      cd ./func
+      zip -r ../function_package.zip .
+      az functionapp deployment source config-zip \
+        --resource-group ${var.rg_name} \
+        --name ${azurerm_windows_function_app.function_app.name} \
+        --src ../function_package.zip
+    EOT
+  }
+  depends_on = [azurerm_windows_function_app.function_app]
+}

@@ -32,3 +32,4 @@ terraform/.terraform.lock.hcl
 html/index.html
 
 terraform/.infracost
+terraform/function_package.zip
