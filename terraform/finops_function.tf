@@ -99,10 +99,32 @@ resource "azurerm_function_app_function" "timer_trigger" {
       }
     ]
   })
+
+  file {
+    name    = "requirements.psd1"
+    content = <<EOT
+@{
+    # Authentication and account management
+    'Az.Accounts' = '5.*'
+
+    # Networking (for Bastion)
+    'Az.Network' = '7.*'
+
+    # Kubernetes Service cluster operations
+    'Az.Aks' = '7.*'
+
+    # Virtual machine operations
+    'Az.Compute' = '11.*'
+}
+EOT
+  }
+
   file {
     name    = "run.ps1"
     content = <<EOT
 param($Timer)
+Disable-AzContextAutosave -Scope Process | Out-Null
+Connect-AzAccount -Identity
 Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
 EOT
   }
