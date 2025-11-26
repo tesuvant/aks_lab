@@ -94,7 +94,7 @@ resource "azurerm_function_app_function" "timer_trigger" {
       {
         "direction" = "in"
         "name"      = "Timer"
-        "schedule" : "0 */5 * * * *"
+        "schedule" : "0 0 */2 * * *"
         "type" = "timerTrigger"
       }
     ]
