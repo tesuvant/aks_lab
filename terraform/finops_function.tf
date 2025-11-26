@@ -1,3 +1,12 @@
+data "azurerm_virtual_machine" "vm" {
+  name                = "foobar"
+  resource_group_name = var.rg_name
+}
+
+data "azurerm_resource_group" "rg" {
+  name = var.rg_name
+}
+
 resource "random_string" "suffix" {
   length  = 8
   lower   = true
@@ -18,11 +27,6 @@ resource "azurerm_storage_account" "function_sa" {
   public_network_access_enabled   = true
 }
 
-data "azurerm_virtual_machine" "vm" {
-  name                = "foobar"
-  resource_group_name = var.rg_name
-}
-
 resource "azurerm_service_plan" "plan" {
   name                = "finops-function-app-plan"
   location            = var.location
@@ -41,27 +45,25 @@ resource "azurerm_windows_function_app" "function_app" {
   storage_account_name          = azurerm_storage_account.function_sa.name
   storage_account_access_key    = azurerm_storage_account.function_sa.primary_access_key
   public_network_access_enabled = false
-  site_config {}
-
-  # version       = "~4"
-  # os_type       = "Windows"
-  # runtime_stack = "powershell"
-
+  site_config {
+    application_stack {
+      powershell_core_version = 7
+    }
+  }
   app_settings = {
-    AKS_NAME                 = var.aks_name
-    AzureWebJobsStorage      = azurerm_storage_account.function_sa.primary_connection_string
-    FUNCTIONS_WORKER_RUNTIME = "powershell"
-    RESOURCE_GROUP           = var.rg_name
-    VM_NAME                  = data.azurerm_virtual_machine.vm.name
-    WEBSITE_RUN_FROM_PACKAGE = "1"
-
-    vnetContentShareEnabled                  = true
-    vnetRouteAllEnabled                      = true
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
-    WEBSITE_CONTENTOVERVNET                  = 1 // Deprecated?
-    WEBSITE_CONTENTSHARE                     = "shutdown-function"
-    WEBSITE_DNS_SERVER                       = "168.63.129.16"
-    WEBSITE_VNET_ROUTE_ALL                   = 1 // Deprecated?
+    AKS_NAME       = var.aks_name
+    RESOURCE_GROUP = var.rg_name
+    VM_NAME        = data.azurerm_virtual_machine.vm.name
+    # AzureWebJobsStorage      = azurerm_storage_account.function_sa.primary_connection_string
+    # FUNCTIONS_WORKER_RUNTIME = "powershell"
+    # WEBSITE_RUN_FROM_PACKAGE = "1"
+    # vnetContentShareEnabled                  = true
+    # vnetRouteAllEnabled                      = true
+    # WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
+    # WEBSITE_CONTENTOVERVNET                  = 1 // Deprecated?
+    # WEBSITE_CONTENTSHARE                     = "shutdown-function"
+    # WEBSITE_DNS_SERVER                       = "168.63.129.16"
+    # WEBSITE_VNET_ROUTE_ALL                   = 1 // Deprecated?
   }
 
   identity {
@@ -72,75 +74,61 @@ resource "azurerm_windows_function_app" "function_app" {
   # checkov:skip=CKV_AZURE_67: latest http version
 }
 
-resource "azurerm_windows_function_app_slot" "slot" {
-  name                          = "staging"
-  function_app_id               = azurerm_windows_function_app.function_app.id
-  public_network_access_enabled = false
-  storage_account_name          = azurerm_storage_account.function_sa.name
-  site_config {}
-  # checkov:skip=CKV_AZURE_56: auth enabled
-  # checkov:skip=CKV_AZURE_70: https only
-  # checkov:skip=CKV_AZURE_67: latest http version
-}
+# resource "azurerm_windows_function_app_slot" "slot" {
+#   name                          = "staging"
+#   function_app_id               = azurerm_windows_function_app.function_app.id
+#   public_network_access_enabled = false
+#   storage_account_name          = azurerm_storage_account.function_sa.name
+#   site_config {}
+#   # checkov:skip=CKV_AZURE_56: auth enabled
+#   # checkov:skip=CKV_AZURE_70: https only
+#   # checkov:skip=CKV_AZURE_67: latest http version
+# }
 
 resource "azurerm_function_app_function" "timer_trigger" {
-  name            = "TimerTriggerFunction"
+  name            = "Shutdown-AKS-VMs"
   function_app_id = azurerm_windows_function_app.function_app.id
-
-  config_json = <<CONFIG
-{
-    "bindings": [
-        {
-            "name": "myTimer",
-            "type": "timerTrigger",
-            "direction": "in",
-            "schedule": "0 0 9 * * *"
-        }
+  language        = "PowerShell"
+  config_json = jsonencode({
+    "bindings" = [
+      {
+        "direction" = "in"
+        "name"      = "Timer"
+        "schedule" : "0 0 9 * * *"
+        "type" = "timerTrigger"
+      }
     ]
-}
-CONFIG
+  })
+  file {
+    name    = "run.ps1"
+    content = <<EOT
+param($Timer)
+Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
+EOT
+  }
 }
 
 resource "azurerm_role_assignment" "aks_access" {
-  scope                = module.aks_cluster.resource_id
+  scope                = data.azurerm_resource_group.rg.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
 
 }
 
-resource "azurerm_role_assignment" "vm_access" {
-  scope                = data.azurerm_virtual_machine.vm.id
-  role_definition_name = "Virtual Machine Contributor"
-  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
-}
+# resource "null_resource" "deploy_function" {
+#   triggers = {
+#     script_hash = filesha256("${path.module}/func/shutdown/run.ps1")
+#   }
 
-resource "azurerm_role_assignment" "function_sa_storage_account_contributor" {
-  scope                = azurerm_storage_account.function_sa.id
-  role_definition_name = "Storage Account Contributor"
-  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "function_sa_file_smb_contributor" {
-  scope                = azurerm_storage_account.function_sa.id
-  role_definition_name = "Storage File Data SMB Share Contributor"
-  principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id
-}
-
-
-resource "null_resource" "deploy_function" {
-  triggers = {
-    script_hash = filesha256("${path.module}/func/shutdown/run.ps1")
-  }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      cd ./func
-      zip -r ../function_package.zip .
-      az functionapp deployment source config-zip \
-        --resource-group ${var.rg_name} \
-        --name ${azurerm_windows_function_app.function_app.name} \
-        --src ../function_package.zip
-    EOT
-  }
-  depends_on = [azurerm_windows_function_app.function_app]
-}
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       cd ./func
+#       zip -r ../function_package.zip .
+#       az functionapp deployment source config-zip \
+#         --resource-group ${var.rg_name} \
+#         --name ${azurerm_windows_function_app.function_app.name} \
+#         --src ../function_package.zip
+#     EOT
+#   }
+#   depends_on = [azurerm_windows_function_app.function_app]
+# }
