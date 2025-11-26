@@ -107,13 +107,19 @@ module "aks_cluster" {
 
   default_node_pool = {
     auto_scaling_enabled = false
-    name                 = "default"
-    node_count           = 1
-    max_pods             = 50
-    vm_size              = "Standard_B2s"
-    vnet_subnet_id       = azurerm_subnet.subnet.id
+
+    name           = "default"
+    node_count     = 1
+    max_pods       = 50
+    vm_size        = "Standard_B2s"
+    vnet_subnet_id = azurerm_subnet.subnet.id
     node_labels = {
       "pool-type" = "default"
+    }
+    upgrade_settings = {
+      drain_timeout_in_minutes      = 0
+      max_surge                     = "10%"
+      node_soak_duration_in_minutes = 0
     }
   }
 
