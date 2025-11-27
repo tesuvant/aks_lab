@@ -161,9 +161,6 @@ catch {
 }
 EOT
   }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "azurerm_role_assignment" "aks_access" {
