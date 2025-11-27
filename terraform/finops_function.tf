@@ -106,24 +106,24 @@ resource "azurerm_function_app_function" "timer_trigger" {
     ]
   })
 
-  file {
-    name    = "requirements.psd1"
-    content = <<EOT
-@{
-    # Authentication and account management
-    'Az.Accounts' = '5.*'
+  #   file {
+  #     name    = "requirements.psd1"
+  #     content = <<EOT
+  # @{
+  #     # Authentication and account management
+  #     'Az.Accounts' = '5.*'
 
-    # Networking (for Bastion)
-    'Az.Network' = '7.*'
+  #     # Networking (for Bastion)
+  #     'Az.Network' = '7.*'
 
-    # Kubernetes Service cluster operations
-    'Az.Aks' = '7.*'
+  #     # Kubernetes Service cluster operations
+  #     'Az.Aks' = '7.*'
 
-    # Virtual machine operations
-    'Az.Compute' = '11.*'
-}
-EOT
-  }
+  #     # Virtual machine operations
+  #     'Az.Compute' = '11.*'
+  # }
+  # EOT
+  #   }
 
   file {
     name    = "run.ps1"
@@ -161,6 +161,22 @@ catch {
 }
 EOT
   }
+}
+
+
+resource "azurerm_storage_blob" "requirements_psd1" {
+  name                   = "wwwroot/requirements.psd1"
+  storage_account_name   = azurerm_storage_account.function_sa.name
+  storage_container_name = "site"
+  type                   = "Block"
+  source_content         = <<EOT
+@{
+    'Az.Accounts' = '5.*'
+    'Az.Network'  = '7.*'
+    'Az.Aks'      = '7.*'
+    'Az.Compute'  = '11.*'
+}
+EOT
 }
 
 resource "azurerm_role_assignment" "aks_access" {
