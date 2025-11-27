@@ -7,6 +7,8 @@ data "azurerm_resource_group" "rg" {
   name = var.rg_name
 }
 
+data "azurerm_subscription" "this" {}
+
 resource "random_string" "suffix" {
   length  = 8
   lower   = true
@@ -55,6 +57,7 @@ resource "azurerm_windows_function_app" "function_app" {
   app_settings = {
     AKS_NAME       = var.aks_name
     RESOURCE_GROUP = var.rg_name
+    SUBSCRIPTION   = data.azurerm_subscription.this.display_name
     VM_NAME        = data.azurerm_virtual_machine.vm.name
     # AzureWebJobsStorage      = azurerm_storage_account.function_sa.primary_connection_string
     # FUNCTIONS_WORKER_RUNTIME = "powershell"
@@ -126,7 +129,36 @@ EOT
     name    = "run.ps1"
     content = <<EOT
 param($Timer)
-Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
+Set-AzContext -Subscription $env:SUBSCRIPTION
+
+# Stop AKS
+try {
+    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -Force -ErrorAction Stop
+    Write-Host "AKS cluster stopped successfully"
+}
+catch {
+    $errorMessage = $_.Exception.Message
+    Write-Warning "Failed to stop AKS cluster: $errorMessage"
+}
+
+# Remove Bastion
+try {
+    Remove-AzBastion -ResourceGroupName $env:RESOURCE_GROUP -Name $env:BASTION_NAME -Force -ErrorAction Stop
+    Write-Host "Bastion deleted"
+}
+catch {
+    $errorMessage = $_.Exception.Message
+    Write-Warning "Failed to delete Bastion: $errorMessage"
+}
+
+# Stop VM
+try {
+    Stop-AzVM -ResourceGroupName $env:RESOURCE_GROUP -Name $env:VM_NAME -Force -ErrorAction Stop
+    Write-Host "VM stopped successfully"
+}
+catch {
+    Write-Warning "Failed to stop VM: $($_.Exception.Message)"
+}
 EOT
   }
 }
@@ -138,29 +170,9 @@ resource "azurerm_role_assignment" "aks_access" {
 
 }
 
-
-# resource "null_resource" "deploy_function" {
-#   triggers = {
-#     script_hash = filesha256("${path.module}/func/shutdown/run.ps1")
-#   }
-
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       cd ./func
-#       zip -r ../function_package.zip .
-#       az functionapp deployment source config-zip \
-#         --resource-group ${var.rg_name} \
-#         --name ${azurerm_windows_function_app.function_app.name} \
-#         --src ../function_package.zip
-#     EOT
-#   }
-#   depends_on = [azurerm_windows_function_app.function_app]
-# }
-
 resource "azurerm_application_insights" "function_app" {
   name                = "shutdown-function-insights"
   location            = var.location
   resource_group_name = var.rg_name
   application_type    = "web"
 }
-
