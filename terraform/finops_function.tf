@@ -46,6 +46,8 @@ resource "azurerm_windows_function_app" "function_app" {
   storage_account_access_key    = azurerm_storage_account.function_sa.primary_access_key
   public_network_access_enabled = false
   site_config {
+    application_insights_connection_string = azurerm_application_insights.function_app.connection_string
+    application_insights_key               = azurerm_application_insights.function_app.instrumentation_key
     application_stack {
       powershell_core_version = 7
     }
@@ -89,12 +91,13 @@ resource "azurerm_function_app_function" "timer_trigger" {
   name            = "Shutdown-AKS-VMs"
   function_app_id = azurerm_windows_function_app.function_app.id
   language        = "PowerShell"
+
   config_json = jsonencode({
     "bindings" = [
       {
         "direction" = "in"
         "name"      = "Timer"
-        "schedule" : "0 0 */2 * * *"
+        "schedule" : "0 */5 * * * *"
         "type" = "timerTrigger"
       }
     ]
@@ -123,8 +126,6 @@ EOT
     name    = "run.ps1"
     content = <<EOT
 param($Timer)
-Disable-AzContextAutosave -Scope Process | Out-Null
-Connect-AzAccount -Identity
 Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
 EOT
   }
@@ -156,3 +157,11 @@ resource "azurerm_role_assignment" "aks_access" {
 #   depends_on = [azurerm_windows_function_app.function_app]
 # }
 
+
+
+resource "azurerm_application_insights" "function_app" {
+  name                = "shutdown-function-insights"
+  location            = var.location
+  resource_group_name = var.rg_name
+  application_type    = "web"
+}
