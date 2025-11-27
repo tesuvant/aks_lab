@@ -163,3 +163,4 @@ resource "azurerm_application_insights" "function_app" {
   resource_group_name = var.rg_name
   application_type    = "web"
 }
+
