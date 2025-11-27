@@ -157,8 +157,6 @@ resource "azurerm_role_assignment" "aks_access" {
 #   depends_on = [azurerm_windows_function_app.function_app]
 # }
 
-
-
 resource "azurerm_application_insights" "function_app" {
   name                = "shutdown-function-insights"
   location            = var.location
