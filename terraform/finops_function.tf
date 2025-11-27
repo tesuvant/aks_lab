@@ -137,6 +137,7 @@ resource "azurerm_role_assignment" "aks_access" {
 
 }
 
+
 # resource "null_resource" "deploy_function" {
 #   triggers = {
 #     script_hash = filesha256("${path.module}/func/shutdown/run.ps1")
