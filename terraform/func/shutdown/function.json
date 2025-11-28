@@ -1,16 +1,10 @@
 {
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "name": "Timer",
+      "type": "timerTrigger",
       "direction": "in",
-      "name": "Request",
-      "methods": [ "get", "post" ]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "Response"
+      "schedule": "0 */5 * * * *"
     }
   ],
   "scriptFile": "run.ps1"

@@ -51,7 +51,7 @@ resource "azurerm_windows_function_app" "function_app" {
     application_insights_connection_string = azurerm_application_insights.function_app.connection_string
     application_insights_key               = azurerm_application_insights.function_app.instrumentation_key
     application_stack {
-      powershell_core_version = 7
+      powershell_core_version = 7.4
     }
   }
   app_settings = {
