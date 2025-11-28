@@ -55,13 +55,13 @@ resource "azurerm_windows_function_app" "function_app" {
     }
   }
   app_settings = {
-    AKS_NAME                                 = var.aks_name
-    FUNCTIONS_EXTENSION_VERSION              = "~4"
-    FUNCTIONS_WORKER_RUNTIME                 = "powershell"
-    RESOURCE_GROUP                           = var.rg_name
-    SUBSCRIPTION                             = data.azurerm_subscription.this.display_name
-    VM_NAME                                  = data.azurerm_virtual_machine.vm.name
-    WEBSITE_RUN_FROM_PACKAGE                 = "1"
+    AKS_NAME                    = var.aks_name
+    FUNCTIONS_EXTENSION_VERSION = "~4"
+    FUNCTIONS_WORKER_RUNTIME    = "powershell"
+    RESOURCE_GROUP              = var.rg_name
+    SUBSCRIPTION                = data.azurerm_subscription.this.display_name
+    VM_NAME                     = data.azurerm_virtual_machine.vm.name
+    # WEBSITE_RUN_FROM_PACKAGE                 = "1"
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
     AzureWebJobsStorage                      = azurerm_storage_account.function_sa.primary_connection_string
     # vnetContentShareEnabled                  = true
