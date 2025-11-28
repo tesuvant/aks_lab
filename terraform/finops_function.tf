@@ -91,22 +91,22 @@ resource "azurerm_windows_function_app" "function_app" {
 #   # checkov:skip=CKV_AZURE_67: latest http version
 # }
 
-resource "azurerm_function_app_function" "timer_trigger" {
-  name            = "Shutdown-AKS-VMs"
-  function_app_id = azurerm_windows_function_app.function_app.id
-  language        = "PowerShell"
+# resource "azurerm_function_app_function" "timer_trigger" {
+#   name            = "Shutdown-AKS-VMs"
+#   function_app_id = azurerm_windows_function_app.function_app.id
+#   language        = "PowerShell"
 
-  config_json = jsonencode({
-    "bindings" = [
-      {
-        "direction" = "in"
-        "name"      = "Timer"
-        "schedule" : "0 */5 * * * *"
-        "type" = "timerTrigger"
-      }
-    ]
-  })
-}
+#   config_json = jsonencode({
+#     "bindings" = [
+#       {
+#         "direction" = "in"
+#         "name"      = "Timer"
+#         "schedule" : "0 */5 * * * *"
+#         "type" = "timerTrigger"
+#       }
+#     ]
+#   })
+# }
 
 data "archive_file" "function" {
   type        = "zip"
