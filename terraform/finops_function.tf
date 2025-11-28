@@ -55,10 +55,11 @@ resource "azurerm_windows_function_app" "function_app" {
     }
   }
   app_settings = {
-    AKS_NAME       = var.aks_name
-    RESOURCE_GROUP = var.rg_name
-    SUBSCRIPTION   = data.azurerm_subscription.this.display_name
-    VM_NAME        = data.azurerm_virtual_machine.vm.name
+    AKS_NAME                 = var.aks_name
+    RESOURCE_GROUP           = var.rg_name
+    SUBSCRIPTION             = data.azurerm_subscription.this.display_name
+    VM_NAME                  = data.azurerm_virtual_machine.vm.name
+    WEBSITE_RUN_FROM_PACKAGE = "1"
     # AzureWebJobsStorage      = azurerm_storage_account.function_sa.primary_connection_string
     # FUNCTIONS_WORKER_RUNTIME = "powershell"
     # WEBSITE_RUN_FROM_PACKAGE = "1"
@@ -105,81 +106,30 @@ resource "azurerm_function_app_function" "timer_trigger" {
       }
     ]
   })
-
-  #   file {
-  #     name    = "requirements.psd1"
-  #     content = <<EOT
-  # @{
-  #     # Authentication and account management
-  #     'Az.Accounts' = '5.*'
-
-  #     # Networking (for Bastion)
-  #     'Az.Network' = '7.*'
-
-  #     # Kubernetes Service cluster operations
-  #     'Az.Aks' = '7.*'
-
-  #     # Virtual machine operations
-  #     'Az.Compute' = '11.*'
-  # }
-  # EOT
-  #   }
-
-  file {
-    name    = "run.ps1"
-    content = <<EOT
-param($Timer)
-Set-AzContext -Subscription $env:SUBSCRIPTION
-
-# Stop AKS
-try {
-    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -Force -ErrorAction Stop
-    Write-Host "AKS cluster stopped successfully"
-}
-catch {
-    $errorMessage = $_.Exception.Message
-    Write-Warning "Failed to stop AKS cluster: $errorMessage"
 }
 
-# Remove Bastion
-try {
-    Remove-AzBastion -ResourceGroupName $env:RESOURCE_GROUP -Name $env:BASTION_NAME -Force -ErrorAction Stop
-    Write-Host "Bastion deleted"
-}
-catch {
-    $errorMessage = $_.Exception.Message
-    Write-Warning "Failed to delete Bastion: $errorMessage"
+data "archive_file" "function" {
+  type        = "zip"
+  source_dir  = "${path.module}/func/"
+  output_path = "${path.module}/function_package.zip"
 }
 
-# Stop VM
-try {
-    Stop-AzVM -ResourceGroupName $env:RESOURCE_GROUP -Name $env:VM_NAME -Force -ErrorAction Stop
-    Write-Host "VM stopped successfully"
-}
-catch {
-    Write-Warning "Failed to stop VM: $($_.Exception.Message)"
-}
-EOT
+resource "null_resource" "upload_function" {
+  triggers = {
+    function_app_id = azurerm_windows_function_app.function_app.id
+    src_hash        = data.archive_file.function.output_sha
+  }
+  provisioner "local-exec" {
+    command = <<CMD
+az functionapp deployment source config-zip \
+  --resource-group ${var.rg_name} \
+  --name ${azurerm_windows_function_app.function_app.name} \
+  --src ${path.module}/function_package.zip
+CMD
   }
 }
 
-
-resource "azurerm_storage_blob" "requirements_psd1" {
-  name                   = "wwwroot/requirements.psd1"
-  storage_account_name   = azurerm_storage_account.function_sa.name
-  storage_container_name = "site"
-  type                   = "Block"
-  source_content         = <<EOT
-@{
-    'Az.Accounts' = '5.*'
-    'Az.Network'  = '7.*'
-    'Az.Aks'      = '7.*'
-    'Az.Compute'  = '11.*'
-}
-EOT
-}
-
-resource "azurerm_role_assignment" "aks_access" {
+resource "azurerm_role_assignment" "rg_access" {
   scope                = data.azurerm_resource_group.rg.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_windows_function_app.function_app.identity[0].principal_id

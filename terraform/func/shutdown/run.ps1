@@ -1,43 +1,31 @@
-param($TimerTrigger, $TriggerMetadata)
+param($Timer)
+Set-AzContext -Subscription $env:SUBSCRIPTION
 
-Write-Host "PowerShell function triggered at: $(Get-Date)"
-
+# Stop AKS
 try {
-    # Connect to Azure using Managed Identity
-    Connect-AzAccount -Identity
+    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -Force -ErrorAction Stop
+    Write-Host "AKS cluster stopped successfully"
+}
+catch {
+    $errorMessage = $_.Exception.Message
+    Write-Warning "Failed to stop AKS cluster: $errorMessage"
+}
 
-    # Variables: replace with your actual resource details
-    $resourceGroup = $env:RESOURCE_GROUP
-    $aksName = $env:AKS_NAME
-    $vmName = $env:VM_NAME
+# Remove Bastion
+try {
+    Remove-AzBastion -ResourceGroupName $env:RESOURCE_GROUP -Name $env:BASTION_NAME -Force -ErrorAction Stop
+    Write-Host "Bastion deleted"
+}
+catch {
+    $errorMessage = $_.Exception.Message
+    Write-Warning "Failed to delete Bastion: $errorMessage"
+}
 
-    # AKS exists check
-    $aks = $null
-    try {
-        $aks = Get-AzAksCluster -ResourceGroupName $resourceGroup -Name $aksName -ErrorAction Stop
-    } catch {
-        Write-Host "AKS cluster '$aksName' not found in resource group '$resourceGroup'. Skipping stop."
-    }
-
-    # AKS stop
-    if ($aks) {
-        Stop-AzAksCluster -ResourceGroupName $resourceGroup -Name $aksName -Force
-        Write-Host "AKS cluster '$aksName' stopped."
-    }
-
-    # VM exsists check
-    $vm = $null
-    try {
-        $vm = Get-AzVM -ResourceGroupName $resourceGroup -Name $vmName -ErrorAction Stop
-    } catch {
-        Write-Host "Virtual machine '$vmName' not found in resource group '$resourceGroup'. Skipping stop."
-    }
-    # VM stop
-    if ($vm) {
-        Stop-AzVM -ResourceGroupName $resourceGroup -Name $vmName -Force
-        Write-Host "Virtual machine '$vmName' stopped."
-    }
-
-} catch {
-    Write-Error "Error: $_"
+# Stop VM
+try {
+    Stop-AzVM -ResourceGroupName $env:RESOURCE_GROUP -Name $env:VM_NAME -Force -ErrorAction Stop
+    Write-Host "VM stopped successfully"
+}
+catch {
+    Write-Warning "Failed to stop VM: $($_.Exception.Message)"
 }
