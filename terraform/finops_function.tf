@@ -55,19 +55,19 @@ resource "azurerm_windows_function_app" "function_app" {
     }
   }
   app_settings = {
-    AKS_NAME                    = var.aks_name
-    FUNCTIONS_EXTENSION_VERSION = "~4"
-    FUNCTIONS_WORKER_RUNTIME    = "powershell"
-    RESOURCE_GROUP              = var.rg_name
-    SUBSCRIPTION                = data.azurerm_subscription.this.display_name
-    VM_NAME                     = data.azurerm_virtual_machine.vm.name
-    WEBSITE_RUN_FROM_PACKAGE    = "1"
-    AzureWebJobsStorage         = azurerm_storage_account.function_sa.primary_connection_string
+    AKS_NAME                                 = var.aks_name
+    FUNCTIONS_EXTENSION_VERSION              = "~4"
+    FUNCTIONS_WORKER_RUNTIME                 = "powershell"
+    RESOURCE_GROUP                           = var.rg_name
+    SUBSCRIPTION                             = data.azurerm_subscription.this.display_name
+    VM_NAME                                  = data.azurerm_virtual_machine.vm.name
+    WEBSITE_RUN_FROM_PACKAGE                 = "1"
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
+    AzureWebJobsStorage                      = azurerm_storage_account.function_sa.primary_connection_string
     # vnetContentShareEnabled                  = true
     # vnetRouteAllEnabled                      = true
-    # WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
     # WEBSITE_CONTENTOVERVNET                  = 1 // Deprecated?
-    # WEBSITE_CONTENTSHARE                     = "shutdown-function"
+    WEBSITE_CONTENTSHARE = "shutdown-function"
     # WEBSITE_DNS_SERVER                       = "168.63.129.16"
     # WEBSITE_VNET_ROUTE_ALL                   = 1 // Deprecated?
   }
