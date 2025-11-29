@@ -14,7 +14,7 @@ Set-AzContext -Subscription $env:SUBSCRIPTION
 $aks = Get-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -ErrorAction SilentlyContinue
 if ($aks.PowerState.Code -eq "Running") {
     Write-Information "AKS $($aks.Name) is running. Stopping" -InformationAction Continue
-    $aks | Stop-AzAksCluster -Force
+    $aks | Stop-AzAksCluster
     Write-Information "AKS $($aks.Name) is stopping" -InformationAction Continue
 } else {
     Write-Information "AKS $($aks.Name) already stopped (PowerState: $($aks.PowerState.Code))" -InformationAction Continue
