@@ -1,4 +1,9 @@
 param($Timer)
+Import-Module Az.Accounts
+Import-Module Az.Compute
+Import-Module Az.Aks
+Import-Module Az.Network
+
 Set-AzContext -Subscription $env:SUBSCRIPTION
 
 # Stop AKS

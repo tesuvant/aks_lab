@@ -1,5 +1,8 @@
 {
   "version": "2.0",
   "logging": {},
-  "functionTimeout": "00:05:00"
+  "functionTimeout": "00:05:00",
+  "managedDependency": {
+    "enabled": true
+  }
 }
