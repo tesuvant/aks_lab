@@ -1,8 +1,12 @@
 param($Timer)
-Import-Module Az.Accounts
-Import-Module Az.Compute
-Import-Module Az.Aks
-Import-Module Az.Network
+
+Write-Host "Listing available Az modules..."
+Get-Module -ListAvailable Az* | Select-Object Name, Version | Out-String | Write-Host
+Import-Module Az.Accounts -ErrorAction Stop
+Import-Module Az.Compute  -ErrorAction Stop
+Import-Module Az.Aks      -ErrorAction Stop
+Import-Module Az.Network  -ErrorAction Stop
+Write-Host "Modules imported successfully"
 
 Set-AzContext -Subscription $env:SUBSCRIPTION
 
