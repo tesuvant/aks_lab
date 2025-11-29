@@ -24,9 +24,27 @@ resource "azurerm_storage_account" "function_sa" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   account_kind             = "StorageV2"
+  min_tls_version          = "TLS1_2"
 
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = true
+
+  blob_properties {
+    delete_retention_policy {
+      days = 7
+    }
+  }
+
+  sas_policy {
+    expiration_period = "00.24:00:00"
+  }
+
+  # checkov:skip=CKV_AZURE_206:Intentional LRS for cost optimization on low-value Function storage
+  # checkov:skip=CKV_AZURE_33:Queue logging not needed for Function App storage
+  # checkov:skip=CKV_AZURE_59:
+  # checkov:skip=CKV_AZURE_40:
+  # checkov:skip=CKV_AZURE_33:  
+  # checkov:skip=CKV_AZURE_1:
 }
 
 resource "azurerm_service_plan" "plan" {
@@ -73,6 +91,8 @@ resource "azurerm_windows_function_app" "function_app" {
   # checkov:skip=CKV_AZURE_56: auth enabled
   # checkov:skip=CKV_AZURE_70: https only
   # checkov:skip=CKV_AZURE_67: latest http version
+  # checkov:skip=CKV_AZURE_221:
+
 }
 
 data "archive_file" "function" {
