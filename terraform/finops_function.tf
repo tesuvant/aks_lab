@@ -125,7 +125,7 @@ resource "null_resource" "upload_function" {
   provisioner "local-exec" {
     command = <<CMD
 az functionapp deployment source config-zip \
-  --clean true \
+  --clean \
   --resource-group ${var.rg_name} \
   --name ${azurerm_windows_function_app.function_app.name} \
   --src ${path.module}/function_package.zip \
