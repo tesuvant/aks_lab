@@ -56,6 +56,7 @@ resource "azurerm_windows_function_app" "function_app" {
   }
   app_settings = {
     AKS_NAME                    = var.aks_name
+    BASTION_NAME                = "private-vnet-bastion"
     FUNCTIONS_EXTENSION_VERSION = "~4"
     FUNCTIONS_WORKER_RUNTIME    = "powershell"
     RESOURCE_GROUP              = var.rg_name

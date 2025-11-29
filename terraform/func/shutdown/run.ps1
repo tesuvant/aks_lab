@@ -12,7 +12,7 @@ Set-AzContext -Subscription $env:SUBSCRIPTION
 
 # Stop AKS
 try {
-    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -Force -ErrorAction Stop
+    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -ErrorAction Stop
     Write-Host "AKS cluster stopped successfully"
 }
 catch {
