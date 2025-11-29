@@ -55,22 +55,16 @@ resource "azurerm_windows_function_app" "function_app" {
     }
   }
   app_settings = {
-    AKS_NAME                    = var.aks_name
-    BASTION_NAME                = "private-vnet-bastion"
-    FUNCTIONS_EXTENSION_VERSION = "~4"
-    FUNCTIONS_WORKER_RUNTIME    = "powershell"
-    RESOURCE_GROUP              = var.rg_name
-    SUBSCRIPTION                = data.azurerm_subscription.this.display_name
-    VM_NAME                     = data.azurerm_virtual_machine.vm.name
-    # WEBSITE_RUN_FROM_PACKAGE                 = "1"
+    AKS_NAME                                 = var.aks_name
+    BASTION_NAME                             = "private-vnet-bastion"
+    FUNCTIONS_EXTENSION_VERSION              = "~4"
+    FUNCTIONS_WORKER_RUNTIME                 = "powershell"
+    RESOURCE_GROUP                           = var.rg_name
+    SUBSCRIPTION                             = data.azurerm_subscription.this.display_name
+    VM_NAME                                  = data.azurerm_virtual_machine.vm.name
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
     AzureWebJobsStorage                      = azurerm_storage_account.function_sa.primary_connection_string
-    # vnetContentShareEnabled                  = true
-    # vnetRouteAllEnabled                      = true
-    # WEBSITE_CONTENTOVERVNET                  = 1 // Deprecated?
-    WEBSITE_CONTENTSHARE = "shutdown-function"
-    # WEBSITE_DNS_SERVER                       = "168.63.129.16"
-    # WEBSITE_VNET_ROUTE_ALL                   = 1 // Deprecated?
+    WEBSITE_CONTENTSHARE                     = "shutdown-function"
   }
 
   identity {
@@ -81,34 +75,6 @@ resource "azurerm_windows_function_app" "function_app" {
   # checkov:skip=CKV_AZURE_67: latest http version
 }
 
-# resource "azurerm_windows_function_app_slot" "slot" {
-#   name                          = "staging"
-#   function_app_id               = azurerm_windows_function_app.function_app.id
-#   public_network_access_enabled = false
-#   storage_account_name          = azurerm_storage_account.function_sa.name
-#   site_config {}
-#   # checkov:skip=CKV_AZURE_56: auth enabled
-#   # checkov:skip=CKV_AZURE_70: https only
-#   # checkov:skip=CKV_AZURE_67: latest http version
-# }
-
-# resource "azurerm_function_app_function" "timer_trigger" {
-#   name            = "Shutdown-AKS-VMs"
-#   function_app_id = azurerm_windows_function_app.function_app.id
-#   language        = "PowerShell"
-
-#   config_json = jsonencode({
-#     "bindings" = [
-#       {
-#         "direction" = "in"
-#         "name"      = "Timer"
-#         "schedule" : "0 */5 * * * *"
-#         "type" = "timerTrigger"
-#       }
-#     ]
-#   })
-# }
-
 data "archive_file" "function" {
   type        = "zip"
   source_dir  = "${path.module}/func/"
@@ -116,10 +82,6 @@ data "archive_file" "function" {
 }
 
 resource "null_resource" "upload_function" {
-  # triggers = {
-  #   function_app_id = azurerm_windows_function_app.function_app.id
-  #   src_hash        = data.archive_file.function.output_sha
-  # }
   triggers = {
     always_run = timestamp()
   }
@@ -162,4 +124,5 @@ resource "azurerm_application_insights" "function_app" {
   location            = var.location
   resource_group_name = var.rg_name
   application_type    = "web"
+  retention_in_days   = "30"
 }
