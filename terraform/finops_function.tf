@@ -115,9 +115,12 @@ data "archive_file" "function" {
 }
 
 resource "null_resource" "upload_function" {
+  # triggers = {
+  #   function_app_id = azurerm_windows_function_app.function_app.id
+  #   src_hash        = data.archive_file.function.output_sha
+  # }
   triggers = {
-    function_app_id = azurerm_windows_function_app.function_app.id
-    src_hash        = data.archive_file.function.output_sha
+    always_run = timestamp()
   }
   provisioner "local-exec" {
     command = <<CMD
