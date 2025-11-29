@@ -36,7 +36,7 @@ resource "azurerm_storage_account" "function_sa" {
   }
 
   sas_policy {
-    expiration_period = "00.24:00:00"
+    expiration_period = "01.00:00:00"
   }
 
   # checkov:skip=CKV_AZURE_206:Intentional LRS for cost optimization
