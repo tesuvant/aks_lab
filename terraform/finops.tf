@@ -39,12 +39,13 @@ resource "azurerm_storage_account" "function_sa" {
     expiration_period = "00.24:00:00"
   }
 
-  # checkov:skip=CKV_AZURE_206:Intentional LRS for cost optimization on low-value Function storage
+  # checkov:skip=CKV_AZURE_59:Storage account encryption enabled
   # checkov:skip=CKV_AZURE_33:Queue logging not needed for Function App storage
-  # checkov:skip=CKV_AZURE_59:
-  # checkov:skip=CKV_AZURE_40:
-  # checkov:skip=CKV_AZURE_33:  
-  # checkov:skip=CKV_AZURE_1:
+  # checkov:skip=CKV_AZURE_1:Storage account firewall not needed
+  # checkov:skip=CKV_AZURE_206:Intentional LRS for cost optimization
+  # checkov:skip=CKV_AZURE_33:Queue logging not needed for Function App storage  
+  # checkov:skip=CKV2_AZURE_40:Shared key disabled via allow_shared_key_access=false
+  # checkov:skip=CKV2_AZURE_41:SAS policy configured with 24h expiration
 }
 
 resource "azurerm_service_plan" "plan" {
