@@ -127,7 +127,7 @@ resource "null_resource" "upload_function" {
 az functionapp deployment source config-zip \
   --resource-group ${var.rg_name} \
   --name ${azurerm_windows_function_app.function_app.name} \
-  --src ${path.module}/function_package.zip
+  --src ${path.module}/function_package.zip \
   --debug
 CMD
   }
