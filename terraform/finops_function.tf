@@ -46,7 +46,7 @@ resource "azurerm_windows_function_app" "function_app" {
   service_plan_id               = azurerm_service_plan.plan.id
   storage_account_name          = azurerm_storage_account.function_sa.name
   storage_account_access_key    = azurerm_storage_account.function_sa.primary_access_key
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   site_config {
     application_insights_connection_string = azurerm_application_insights.function_app.connection_string
     application_insights_key               = azurerm_application_insights.function_app.instrumentation_key
