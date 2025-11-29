@@ -133,6 +133,23 @@ CMD
   }
 }
 
+resource "null_resource" "disable_public_access" {
+  triggers = {
+    function_app_id = azurerm_windows_function_app.function_app.id
+  }
+
+  depends_on = [null_resource.upload_function]
+
+  provisioner "local-exec" {
+    command = <<CMD
+az functionapp update \
+  --resource-group ${var.rg_name} \
+  --name ${azurerm_windows_function_app.function_app.name} \
+  --set publicNetworkAccess=Disabled
+CMD
+  }
+}
+
 resource "azurerm_role_assignment" "rg_access" {
   scope                = data.azurerm_resource_group.rg.id
   role_definition_name = "Contributor"
@@ -146,4 +163,3 @@ resource "azurerm_application_insights" "function_app" {
   resource_group_name = var.rg_name
   application_type    = "web"
 }
-

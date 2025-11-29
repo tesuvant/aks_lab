@@ -11,30 +11,33 @@ Write-Host "Modules imported successfully"
 Set-AzContext -Subscription $env:SUBSCRIPTION
 
 # Stop AKS
-try {
-    Stop-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -ErrorAction Stop
-    Write-Host "AKS cluster stopped successfully"
-}
-catch {
-    $errorMessage = $_.Exception.Message
-    Write-Warning "Failed to stop AKS cluster: $errorMessage"
+$aks = Get-AzAksCluster -ResourceGroupName $env:RESOURCE_GROUP -Name $env:AKS_NAME -ErrorAction SilentlyContinue
+if ($aks.PowerState.Code -eq "Running") {
+    Write-Information "AKS $($aks.Name) is running. Stopping" -InformationAction Continue
+    $aks | Stop-AzAksCluster -Force
+    Write-Information "AKS $($aks.Name) is stopping" -InformationAction Continue
+} else {
+    Write-Information "AKS $($aks.Name) already stopped (PowerState: $($aks.PowerState.Code))" -InformationAction Continue
 }
 
 # Remove Bastion
-try {
-    Remove-AzBastion -ResourceGroupName $env:RESOURCE_GROUP -Name $env:BASTION_NAME -Force -ErrorAction Stop
-    Write-Host "Bastion deleted"
-}
-catch {
-    $errorMessage = $_.Exception.Message
-    Write-Warning "Failed to delete Bastion: $errorMessage"
+$bastion = Get-AzBastion -ResourceGroupName $env:RESOURCE_GROUP -Name $env:BASTION_NAME -ErrorAction SilentlyContinue
+if ($bastion) {
+    Write-Information "Bastion $($bastion.Name) exists. Deleting" -InformationAction Continue
+    $bastion | Remove-AzBastion -Force
+    Write-Information "Bastion $($bastion.Name) is deleting" -InformationAction Continue
+} else {
+    Write-Information "Bastion $($env:BASTION_NAME) does not exist" -InformationAction Continue
 }
 
-# Stop VM
-try {
-    Stop-AzVM -ResourceGroupName $env:RESOURCE_GROUP -Name $env:VM_NAME -Force -ErrorAction Stop
-    Write-Host "VM stopped successfully"
-}
-catch {
-    Write-Warning "Failed to stop VM: $($_.Exception.Message)"
+# Stop VMs
+$vms = Get-AzVm -ResourceGroupName $env:RESOURCE_GROUP -Status
+foreach ($vm in $vms) {
+    if ($vm.PowerState -like "*running*") {
+        Write-Information "VM $($vm.Name) is running. Stopping" -InformationAction Continue
+        $vm | Stop-AzVM -Force -NoWait
+        Write-Information "VM $($vm.Name) is stopping" -InformationAction Continue
+    } else {
+        Write-Information "VM $($vm.Name) already stopped (PowerState: $($vm.PowerState))" -InformationAction Continue
+    }
 }
