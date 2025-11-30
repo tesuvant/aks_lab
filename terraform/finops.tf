@@ -59,7 +59,7 @@ resource "azurerm_service_plan" "plan" {
 }
 
 resource "azurerm_windows_function_app" "function_app" {
-  name                          = "shutdown-function"
+  name                          = "shutdown-func"
   location                      = var.location
   resource_group_name           = var.rg_name
   service_plan_id               = azurerm_service_plan.plan.id
@@ -83,7 +83,7 @@ resource "azurerm_windows_function_app" "function_app" {
     VM_NAME                                  = data.azurerm_virtual_machine.vm.name
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = azurerm_storage_account.function_sa.primary_connection_string
     AzureWebJobsStorage                      = azurerm_storage_account.function_sa.primary_connection_string
-    WEBSITE_CONTENTSHARE                     = "shutdown-function"
+    WEBSITE_CONTENTSHARE                     = "shutdown-func"
   }
 
   identity {
@@ -141,7 +141,7 @@ resource "azurerm_role_assignment" "rg_access" {
 }
 
 resource "azurerm_application_insights" "function_app" {
-  name                = "shutdown-function-insights"
+  name                = "shutdown-func-insights"
   location            = var.location
   resource_group_name = var.rg_name
   application_type    = "web"
