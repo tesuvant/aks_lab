@@ -9,6 +9,7 @@ This repository contains Infrastructure as Code (IaC) for Azure that bootstraps 
 - 🚀 Bootstraps relevant networking, identity, and cluster configuration resources
 - 📚 Suitable for hands-on Azure and Kubernetes learning 📚
 - 📊 Demonstrates practical Terraform and AKS usage
+- 💰 FinOps: Automatic shutdown of expensive resources outside working hours
 
 
 ## Overview of Workflows in `aks_lab`
@@ -50,6 +51,29 @@ This repository contains Infrastructure as Code (IaC) for Azure that bootstraps 
   - Deletes workflow run logs older than configured days (0 days here means all logs).
   - Uses a Personal Access Token (`secrets.CLEAN_WF`) with appropriate permissions to delete logs.
   - Runs with `continue-on-error: true` to avoid workflow failure if cleanup errors occur.
+
+## 💰 FinOps: Automatic Cost Optimization (Shutdown Function)
+
+**Automatically stops expensive resources outside working hours** to save costs:
+
+  - 🛑 Stops AKS cluster
+  - 🛑 Stops VM instance
+  - 🗑️ Deletes Bastion host
+  - ⏰ Timer trigger
+
+### How it works:
+- **Azure Function App** (`finops.tf`) with PowerShell runtime
+- **Managed Identity** + RBAC permissions to manage AKS/VM/Bastion
+- **Existence checks** prevent errors if resources already stopped
+- **Comprehensive logging** via Application Insights (30-day retention)
+- **Secure**: Public network access disabled, Shared Key auth disabled
+
+### Terraform-managed:
+```
+./terraform/finops.tf → Function App + Storage + Insights + RBAC
+./terraform/func/ → PowerShell shutdown script
+```
+
 
 ## Dependency Management with Renovate
 
