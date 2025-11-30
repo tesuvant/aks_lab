@@ -147,3 +147,4 @@ resource "azurerm_application_insights" "function_app" {
   application_type    = "web"
   retention_in_days   = "30"
 }
+
