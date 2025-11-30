@@ -68,6 +68,7 @@ This repository contains Infrastructure as Code (IaC) for Azure that bootstraps 
 - **Comprehensive logging** via Application Insights (30-day retention)
 - **Secure**: Public network access disabled, Shared Key auth disabled
 
+<img width="936" height="219" alt="grafik" src="https://github.com/user-attachments/assets/4dfd2791-e0df-4f20-a4fe-82829b423873" />
 <img width="1104" height="586" alt="grafik" src="https://github.com/user-attachments/assets/cd4a3477-7904-4e24-8f8b-d0d714e0ff59" />
 <img width="529" height="400" alt="grafik" src="https://github.com/user-attachments/assets/b0e3993e-1536-4c7f-8277-c16cc0d130c6" />
 
